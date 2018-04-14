@@ -1,16 +1,16 @@
 \ This is a prime calculator program
 
-: setup ( n1 -- a-addr n2 )
+: セットアップ ( n1 -- a-addr n2 )
   cells allocate throw  \ allocate n1 cells of memory
   2 over !	 	\ store 2 in the beginning of the sieve
   1 	  		\ one element in the sieve
 ;
 
-: teardown ( a-addr -- )
+: 取り壊す ( a-addr -- )
   free throw 	       \ free the allocated memory
 ;
 
-: checksieve ( a-addr n1 n2 -- n1 f ) recursive \ checks if n1 is a multiple of the n2 primes already stored in a-addr
+: 点検員 ( a-addr n1 n2 -- n1 f ) recursive \ checks if n1 is a multiple of the n2 primes already stored in a-addr
 dup 0 > if      \ if we don't have any primes in the (remaining) sieve, stop
   swap rot over \ primes candidate address candidate
   over @   	\ copy address to top and read
@@ -19,7 +19,7 @@ dup 0 > if      \ if we don't have any primes in the (remaining) sieve, stop
     1 cells +	\ calculate offset address for recursive call
     rot 1 - 	\ decrement amount of primes to check
     rot swap	\ restore order
-    checksieve  \ recursive call
+    点検員  \ recursive call
   else
      rot drop drop true \ clean up after ourselves
   endif
@@ -29,7 +29,7 @@ else
 endif
 ;
 
-: runhelper ( a-addr n1 n2 -- ) recursive \ n1 number of cells in a-addr, n2 number of already occupied cells
+: ランヘルパン ( a-addr n1 n2 -- ) recursive \ n1 number of cells in a-addr, n2 number of already occupied cells
 2dup <> if     	     	\ break off the recursion if we have as many primes as cells
   rot 2dup 2dup 2dup	\ make enough copies of address and cell number
   swap	    	 	\ rearrange to allow for cell access
@@ -37,34 +37,33 @@ endif
   cells + @		\ read last cell
   1 +			\ generate candidate from last cell
   rot			\ rearrange arguments to befit checksieve
-  checksieve		\ check if our candidate is a multiple of a known prime or not
+  点検員		\ check if our candidate is a multiple of a known prime or not
   begin
     0 <> while		\ while candidate isn't prime
     1 +  		\ increment candidate by one
     1 2over 2tuck 2drop drop	    \ FIXME, this is fucking ugly but required to copy our addresses and prime counts so far
     rot		\ rearrange arguments to befit checksieve
-    checksieve		\ check if our candidate is a multiple of a known prime or not
+    点検員		\ check if our candidate is a multiple of a known prime or not
   repeat		\ repeat until we found an unknown prime
   swap rot		\ arrange arguments so we can store it in the cell
   cells + !		\ store
   swap 1 + swap	\ increment number of found primes
   rot rot  		\ rearrange arguments for recursive call
-  runhelper  		\ recursive call
+  ランヘルパン  		\ recursive call
 endif
 ;
 
-: run ( n -- )	\ n is the number of primes to find
+: 走る ( n -- )	\ n is the number of primes to find
   dup 	     	\ duplicate that number
-  setup		\ allocate n cells 
+  セットアップ	\ allocate n cells 
   rot swap	\ prepare args for runhelper
-  runhelper	\ run runhelper
+  ランヘルパン	\ run runhelper
   rot		\ move address to top
-  teardown	\ free the memory at address
+  取り壊す	\ free the memory at address
 ;
 
-100 run		\ calculate 100 primes
+100 走る	\ calculate 100 primes
 
 
-
-
+ 
 
